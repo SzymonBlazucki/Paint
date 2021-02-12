@@ -98,7 +98,7 @@ function rayTrace(start, state) {
             vy = newVel.vy
             // console.log("n works")
         }
-        if (Math.abs(x - xPrev) > 1 || Math.abs(y - yPrev) > 1) { console.log(`x:${x} y:${y}, vx:${vx}, vy:${vy}, i: ${i}, j: ${j},`) }
+        // if (Math.abs(x - xPrev) > 1 || Math.abs(y - yPrev) > 1) { console.log(`x:${x} y:${y}, vx:${vx}, vy:${vy}, i: ${i}, j: ${j},`) }
         xPrev = x
         yPrev = y
         jPrev = j
@@ -263,6 +263,8 @@ function drawPicture(picture, canvas, scale) {
             cxMain.globalAlpha = 1
         }
     }
+    test = rayTrace(standardize({ vx: 3, vy: 5 }), { maxIterations: 100, x: 200, y: 200 })
+    rayDraw(test, "red", { maxIterations: 100, x: 200, y: 200 })
 }
 
 PictureCanvas.prototype.mouse = function (downEvent, onDown) {
@@ -383,7 +385,7 @@ function drawIndex(pos, state, dispatch) {
     function drawPixel({ x, y }, state) {
         let drawn = { x, y, color: state.color };
         refIndex[x][y] = state.index
-        console.log(parseFloat(state.index))
+        // console.log(parseFloat(state.index))
         dispatch({ picture: state.picture.draw([drawn]) });
     }
     drawPixel(pos, state);
@@ -447,15 +449,15 @@ let app = new PixelEditor(state, {
     }
 });
 document.body.appendChild(document.createElement("div")).appendChild(app.dom)
-startRay= document.createElement("BUTTON")
-// console.log(document.getElementById("btn"))
-// startRay = document.getElementById("btn")
-startRay.innerHTML = "Turn on the light!"
+// startRay= document.createElement("BUTTON")
+// // console.log(document.getElementById("btn"))
+// // startRay = document.getElementById("btn")
+// startRay.innerHTML = "Turn on the light!"
 
-function starter() {
-    test = rayTrace(standardize({ vx: 3, vy: 5 }), { maxIterations: 100, x: 200, y: 200 })
-    rayDraw(test, "red", { maxIterations: 100, x: 200, y: 200 })
-    console.log("it works")
-}
-startRay.addEventListener("click", starter)
-document.body.appendChild(startRay)
+// function starter() {
+//     test = rayTrace(standardize({ vx: 3, vy: 5 }), { maxIterations: 100, x: 200, y: 200 })
+//     rayDraw(test, "red", { maxIterations: 100, x: 200, y: 200 })
+//     console.log("it works")
+// }
+// startRay.addEventListener("click", starter)
+// document.body.appendChild(startRay)
