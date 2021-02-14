@@ -6,7 +6,7 @@ let board = {
 }
 let parameters = {
     number: 10,
-    maxIterations: 100,
+    maxIterations: 1000,
     fluctuation: 0.2
 }
 let beamStart = {
@@ -15,15 +15,17 @@ let beamStart = {
 }
 
 canvas = document.createElement("canvas")
-cxMain = canvas.getContext("2d")
+cxLight = canvas.getContext("2d")
 canvas.width = board.size * (board.width + 2 * board.margin)
 canvas.height = board.size * (board.height + 2 * board.margin)
+cxLight.fillStyle = "yellow"
+cxLight.fillRect(0, 0, canvas.width, canvas.height)
 // svg.setAttributeNS(null, 'height', board.size * (board.height + 2 * board.margin))
 // svg.setAttributeNS(null, 'width', board.size * (board.width + 2 * board.margin))
 
 refIndex = []
 // document.body.appendChild(svg)
-document.body.appendChild(canvas)
+
 // for (let i = 0; i < board.height; i++) {
 //     refIndex[i] = []
 //     for (let j = 0; j < board.width; j++) {
@@ -164,11 +166,11 @@ function rayTrace(start, state) {
     }
     return path
 }
-function rayDraw(res, color, state) {
+function rayDraw(res, color, state, cxMain) {
     cxMain.beginPath()
     cxMain.lineWidth = "1";
     cxMain.strokeStyle = color
-    let calib = board.margin * board.size
+    let calib = 0
     cxMain.moveTo(state.x + calib, state.y + calib)
     for (pos of res) {
         cxMain.lineTo(pos.x * board.size + calib, pos.y * board.size + calib)
@@ -255,16 +257,16 @@ function drawPicture(picture, canvas, scale) {
             // }
             cx.fillStyle = picture.pixel(x, y);
             cx.fillRect(x * scale, y * scale, scale, scale)
-            cxMain.fillStyle = "white"
-            cxMain.fillRect(x * board.size + board.margin * board.size, y * board.size + board.margin * board.size, board.size, board.size)
-            cxMain.globalAlpha = refIndex[x][y] - 1
-            cxMain.fillStyle = "gray"
-            cxMain.fillRect(x * board.size + board.margin * board.size, y * board.size + board.margin * board.size, board.size, board.size)
-            cxMain.globalAlpha = 1
+            cxLight.fillStyle = "yellow"
+            cxLight.fillRect(x * scale, y * scale, board.size, board.size)
+            cxLight.globalAlpha = refIndex[x][y] - 1
+            cxLight.fillStyle = "gray"
+            cxLight.fillRect(x * scale, y * scale, board.size, board.size)
+            cxLight.globalAlpha = 1
         }
     }
     test = rayTrace(standardize({ vx: 3, vy: 5 }), { maxIterations: 100, x: 200, y: 200 })
-    rayDraw(test, "red", { maxIterations: 100, x: 200, y: 200 })
+    rayDraw(test, "red", { maxIterations: 100, x: 200, y: 200 }, cx)
 }
 
 PictureCanvas.prototype.mouse = function (downEvent, onDown) {
@@ -373,6 +375,17 @@ class IndexSelect {
     syncState(state) { this.input.value = state.index; }
 }
 
+// class IndexPrev {
+//     constructor(state, { dispatch }) {
+//         this.button = elt("button", {
+//             onclick: () => dispatch({ index: this.input.value })
+//         });
+//         this.dom = elt("label", null, "Index Selector: ", this.button);
+//     }
+//     syncState(state) { this.input.value = state.index; }
+// }
+
+
 function draw(pos, state, dispatch) {
     function drawPixel({ x, y }, state) {
         let drawn = { x, y, color: state.color };
@@ -429,6 +442,27 @@ function fill({ x, y }, state, dispatch) {
     }
     dispatch({ picture: state.picture.draw(drawn) });
 }
+
+
+// function fillIndex({ x, y }, state, dispatch) {
+//     let targetColor = state.picture.pixel(x, y);
+//     let drawn = [{ x, y, color: state.color }];
+//     for (let done = 0; done < drawn.length; done++) {
+//         for (let { dx, dy } of around) {
+//             let x = drawn[done].x + dx, y = drawn[done].y + dy;
+//             if (x >= 0 &&
+//                 x < state.picture.width &&
+//                 y >= 0 &&
+//                 y < state.picture.height &&
+//                 state.picture.pixel(x, y) == targetColor &&
+//                 !drawn.some(p => p.x == x && p.y == y)) {
+//                 drawn.push({ x, y, color: state.color });
+//             }
+//         }
+//     }
+//     dispatch({ picture: state.picture.draw(drawn) });
+// }
+
 function pick(pos, state, dispatch) {
     dispatch({ color: state.picture.pixel(pos.x, pos.y) });
 }
@@ -449,15 +483,36 @@ let app = new PixelEditor(state, {
     }
 });
 document.body.appendChild(document.createElement("div")).appendChild(app.dom)
-// startRay= document.createElement("BUTTON")
+document.querySelector("div").appendChild(canvas)
+
+function drawIndexMap(picture, canvas, scale) {
+    canvas.width = picture.width * scale;
+    canvas.height = picture.height * scale;
+    let cx = canvas.getContext("2d")
+    for (let y = 0; y < picture.height; y++) {
+        for (let x = 0; x < picture.width; x++) {
+            // if (fluct != 0) {
+            //     cx.fillStyle = picture.pixel(x, y)
+            // }
+            cx.fillStyle = "white"
+            cx.fillRect(x * scale, y * scale, board.size, board.size)
+            cx.globalAlpha = refIndex[x][y] - 1
+            cx.fillStyle = "gray"
+            cx.fillRect(x * scale, y * scale, board.size, board.size)
+            cx.globalAlpha = 1
+        }
+    }
+    test = rayTrace(standardize({ vx: 3, vy: 5 }), { maxIterations: 100, x: 200, y: 200 })
+    rayDraw(test, "red", { maxIterations: 100, x: 200, y: 200 }, cx)
+}
+
+preview = document.createElement("BUTTON")
 // // console.log(document.getElementById("btn"))
 // // startRay = document.getElementById("btn")
-// startRay.innerHTML = "Turn on the light!"
+preview.innerHTML = "Check your index of refraction"
 
-// function starter() {
-//     test = rayTrace(standardize({ vx: 3, vy: 5 }), { maxIterations: 100, x: 200, y: 200 })
-//     rayDraw(test, "red", { maxIterations: 100, x: 200, y: 200 })
-//     console.log("it works")
-// }
-// startRay.addEventListener("click", starter)
-// document.body.appendChild(startRay)
+function starter() {
+ drawIndexMap(state.picture, app.canvas.dom, scale) 
+}
+preview.addEventListener("click", starter)
+document.body.appendChild(preview)
