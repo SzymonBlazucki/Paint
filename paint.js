@@ -368,7 +368,7 @@ class IndexSelect {
             max: 2,
             value: 1.2,
             step: 0.1,
-            onchange: () => dispatch({ index: this.input.value })
+            onchange: () => {dispatch({ index: this.input.value }); welcome.textContent = this.input.value; console.log(state.index)}
         });
         this.dom = elt("label", null, "Index Selector: ", this.input);
     }
@@ -482,6 +482,7 @@ let app = new PixelEditor(state, {
         app.syncState(state);
     }
 });
+welcome = document.querySelector("#indexValue");
 document.body.appendChild(document.createElement("div")).appendChild(app.dom)
 document.querySelector("div").appendChild(canvas)
 
