@@ -16,8 +16,11 @@ let beamStart = {
 
 canvas = document.createElement("canvas")
 cxLight = canvas.getContext("2d")
-canvas.width = board.size * (board.width + 2 * board.margin)
-canvas.height = board.size * (board.height + 2 * board.margin)
+canvas.width = board.size/8 * (board.width + 2 * board.margin)
+canvas.height = board.size/8 * (board.height + 2 * board.margin)
+canvas.style.position = "relative"
+canvas.style.left = "600px"
+canvas.style.top = "-400px"
 cxLight.fillStyle = "yellow"
 cxLight.fillRect(0, 0, canvas.width, canvas.height)
 // svg.setAttributeNS(null, 'height', board.size * (board.height + 2 * board.margin))
@@ -100,7 +103,7 @@ function rayTrace(start, state) {
             vy = newVel.vy
             // console.log("n works")
         }
-        // if (Math.abs(x - xPrev) > 1 || Math.abs(y - yPrev) > 1) { console.log(`x:${x} y:${y}, vx:${vx}, vy:${vy}, i: ${i}, j: ${j},`) }
+        if (Math.abs(x - xPrev) > 1 || Math.abs(y - yPrev) > 1) { console.log(`x:${x} y:${y}, vx:${vx}, vy:${vy}, i: ${i}, j: ${j},`) }
         xPrev = x
         yPrev = y
         jPrev = j
@@ -119,7 +122,8 @@ function rayTrace(start, state) {
                 j++
                 // console.log("b")
             }
-            path.push({ x: x, y: y })
+            // path.push({ x: x, y: y })
+            path.push({ x: x, y: y, vx: vx, vy: vy})
             continue
         }
         else if (vx >= 0 && vy < 0) {
@@ -133,7 +137,8 @@ function rayTrace(start, state) {
                 y = j
                 j--
             }
-            path.push({ x: x, y: y })
+            // path.push({ x: x, y: y })
+            path.push({ x: x, y: y, vx: vx, vy: vy})
             continue
         }
         else if (vx < 0 && vy >= 0) {
@@ -147,7 +152,8 @@ function rayTrace(start, state) {
                 y = j + 1
                 j++
             }
-            path.push({ x: x, y: y })
+            // path.push({ x: x, y: y })
+            path.push({ x: x, y: y, vx: vx, vy: vy})
             continue
         }
         else if (vx < 0 && vy < 0)
@@ -159,9 +165,10 @@ function rayTrace(start, state) {
             else {
                 x = x - vx * (y - j) / vy
                 y = j
-                j++
+                j--
             }
-        path.push({ x: x, y: y })
+            // path.push({ x: x, y: y })
+            path.push({ x: x, y: y, vx: vx, vy: vy})
         continue
     }
     return path
@@ -258,15 +265,15 @@ function drawPicture(picture, canvas, scale) {
             cx.fillStyle = picture.pixel(x, y);
             cx.fillRect(x * scale, y * scale, scale, scale)
             cxLight.fillStyle = "yellow"
-            cxLight.fillRect(x * scale, y * scale, board.size, board.size)
+            cxLight.fillRect(x * scale/8, y * scale/8, board.size/8, board.size/8)
             cxLight.globalAlpha = refIndex[x][y] - 1
             cxLight.fillStyle = "gray"
-            cxLight.fillRect(x * scale, y * scale, board.size, board.size)
+            cxLight.fillRect(x * scale/8, y * scale/8, board.size/8, board.size/8)
             cxLight.globalAlpha = 1
         }
     }
-    test = rayTrace(standardize({ vx: 3, vy: 5 }), { maxIterations: 100, x: 200, y: 200 })
-    rayDraw(test, "red", { maxIterations: 100, x: 200, y: 200 }, cx)
+    test = rayTrace(standardize({ vx: 3, vy: 5 }), { maxIterations: parameters.maxIterations, x: 200, y: 200 })
+    rayDraw(test, "red", { maxIterations: parameters.maxIterations, x: 200, y: 200 }, cx)
 }
 
 PictureCanvas.prototype.mouse = function (downEvent, onDown) {
@@ -411,7 +418,7 @@ function rectangle(start, state, dispatch) {
         let xEnd = Math.max(start.x, pos.x);
         let yEnd = Math.max(start.y, pos.y);
         let drawn = [];
-        console.log(xStart)
+        // console.log(xStart)
         for (let y = yStart; y < yEnd; y++) {
             for (let x = xStart; x < xEnd; x++) {
                 drawn.push({ x, y, color: state.color })
@@ -483,8 +490,10 @@ let app = new PixelEditor(state, {
     }
 });
 welcome = document.querySelector("#indexValue");
+
 document.body.appendChild(document.createElement("div")).appendChild(app.dom)
-document.querySelector("div").appendChild(canvas)
+console.log(document.querySelector("div").children[0])
+document.querySelector("div").children[0].prepend(canvas)
 
 function drawIndexMap(picture, canvas, scale) {
     canvas.width = picture.width * scale;
@@ -503,8 +512,8 @@ function drawIndexMap(picture, canvas, scale) {
             cx.globalAlpha = 1
         }
     }
-    test = rayTrace(standardize({ vx: 3, vy: 5 }), { maxIterations: 100, x: 200, y: 200 })
-    rayDraw(test, "red", { maxIterations: 100, x: 200, y: 200 }, cx)
+    test = rayTrace(standardize({ vx: 3, vy: 5 }), { maxIterations: parameters.maxIterations, x: 200, y: 200 })
+    rayDraw(test, "red", { maxIterations: parameters.maxIterations, x: 200, y: 200 }, cx)
 }
 
 preview = document.createElement("BUTTON")
